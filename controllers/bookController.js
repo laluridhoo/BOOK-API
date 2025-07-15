@@ -14,9 +14,27 @@ exports.createBook = async (req, res) => {
 };
 
 // Get all books
+// Get all books (with optional search)
 exports.getBooks = async (req, res) => {
-  const books = await Book.find();
-  res.json(books);
+  try {
+    const { title, author } = req.query;
+
+    // Membangun query pencarian
+    const query = {};
+
+    if (title) {
+      query.title = { $regex: title, $options: "i" }; // case-insensitive
+    }
+
+    if (author) {
+      query.author = { $regex: author, $options: "i" };
+    }
+
+    const books = await Book.find(query);
+    res.json(books);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 // Get book by ID
