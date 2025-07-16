@@ -13,10 +13,10 @@ exports.createBook = async (req, res) => {
   }
 };
 
-// Get all books with optional search + pagination
+// Get all books with optional search + pagination + sorting
 exports.getBooks = async (req, res) => {
   try {
-    const { title, author, page = 1, limit = 10 } = req.query;
+    const { title, author, page = 1, limit = 10, sortBy = "createdAt", order = "desc" } = req.query;
 
     const query = {};
 
@@ -31,13 +31,20 @@ exports.getBooks = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const total = await Book.countDocuments(query);
 
-    const books = await Book.find(query).skip(skip).limit(parseInt(limit));
+    // Tentukan arah pengurutan: asc = 1, desc = -1
+    const sortOrder = order === "asc" ? 1 : -1;
+    const sortField = {};
+    sortField[sortBy] = sortOrder;
+
+    const books = await Book.find(query).sort(sortField).skip(skip).limit(parseInt(limit));
 
     res.json({
       page: parseInt(page),
       limit: parseInt(limit),
       totalData: total,
       totalPages: Math.ceil(total / limit),
+      sortBy,
+      order,
       data: books,
     });
   } catch (err) {
