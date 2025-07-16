@@ -13,25 +13,33 @@ exports.createBook = async (req, res) => {
   }
 };
 
-// Get all books
-// Get all books (with optional search)
+// Get all books with optional search + pagination
 exports.getBooks = async (req, res) => {
   try {
-    const { title, author } = req.query;
+    const { title, author, page = 1, limit = 10 } = req.query;
 
-    // Membangun query pencarian
     const query = {};
 
     if (title) {
-      query.title = { $regex: title, $options: "i" }; // case-insensitive
+      query.title = { $regex: title, $options: "i" };
     }
 
     if (author) {
       query.author = { $regex: author, $options: "i" };
     }
 
-    const books = await Book.find(query);
-    res.json(books);
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const total = await Book.countDocuments(query);
+
+    const books = await Book.find(query).skip(skip).limit(parseInt(limit));
+
+    res.json({
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalData: total,
+      totalPages: Math.ceil(total / limit),
+      data: books,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
