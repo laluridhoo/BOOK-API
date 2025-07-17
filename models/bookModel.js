@@ -22,6 +22,11 @@ const bookSchema = new mongoose.Schema(
     finished: {
       type: Boolean,
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true }
 );

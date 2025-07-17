@@ -6,7 +6,16 @@ exports.createBook = async (req, res) => {
     const { title, author, year, pageCount, readPage } = req.body;
     const finished = pageCount === readPage;
 
-    const book = await Book.create({ title, author, year, pageCount, readPage, finished });
+    const book = await Book.create({
+      title,
+      author,
+      year,
+      pageCount,
+      readPage,
+      finished,
+      user: req.user._id,
+    });
+
     res.status(201).json(book);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -16,7 +25,7 @@ exports.createBook = async (req, res) => {
 // Get all books with optional search + pagination + sorting
 exports.getBooks = async (req, res) => {
   try {
-    const { title, author, page = 1, limit = 10, sortBy = "createdAt", order = "desc" } = req.query;
+    const { title, author, page = 1, limit = 10, sortBy = "createdAt", order = "desc", finished } = req.query;
 
     const query = {};
 
@@ -28,6 +37,12 @@ exports.getBooks = async (req, res) => {
       query.author = { $regex: author, $options: "i" };
     }
 
+    if (finished === "true") {
+      query.finished = true;
+    } else if (finished === "false") {
+      query.finished = false;
+    }
+
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const total = await Book.countDocuments(query);
 
@@ -36,7 +51,10 @@ exports.getBooks = async (req, res) => {
     const sortField = {};
     sortField[sortBy] = sortOrder;
 
-    const books = await Book.find(query).sort(sortField).skip(skip).limit(parseInt(limit));
+    const books = await Book.find({ user: req.user._id, ...query })
+      .sort(sortField)
+      .skip(skip)
+      .limit(parseInt(limit));
 
     res.json({
       page: parseInt(page),
@@ -45,6 +63,7 @@ exports.getBooks = async (req, res) => {
       totalPages: Math.ceil(total / limit),
       sortBy,
       order,
+      filter: { finished },
       data: books,
     });
   } catch (err) {
