@@ -71,6 +71,18 @@ exports.getBooks = async (req, res) => {
   }
 };
 
+exports.getMyBooks = async (req, res) => {
+  try {
+    const books = await Book.find({ user: req.user._id }).sort({ createdAt: -1 });
+    res.json({
+      count: books.length,
+      books,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // Get book by ID
 exports.getBookById = async (req, res) => {
   try {

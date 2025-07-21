@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 
 const protect = async (req, res, next) => {
+  // Ambil token dari header Authorization dengan format "Bearer <token>"
   let token = req.headers.authorization?.split(" ")[1]; // Bearer <token>
 
   if (!token) return res.status(401).json({ message: "Not authorized, no token" });
