@@ -17,7 +17,12 @@ const userSchema = new mongoose.Schema(
       required: [true, "Password is required"],
     },
   },
-  { timestamps: true }
+  { timestamps: true },
+  {
+    // Tambahkan field untuk reset password
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
+  }
 );
 
 // Hash password sebelum disimpan

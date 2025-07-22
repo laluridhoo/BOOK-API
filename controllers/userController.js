@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
@@ -98,4 +100,69 @@ exports.deleteAccount = async (req, res) => {
 exports.logoutUser = (req, res) => {
   // Tidak ada token di server (JWT stateless), jadi frontend yang hapus token
   res.json({ message: "Logout berhasil. Silakan hapus token di client." });
+};
+
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // generate token
+    const resetToken = crypto.randomBytes(20).toString("hex");
+    const hash = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+    user.resetPasswordToken = hash;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 jam
+    await user.save();
+
+    const resetUrl = `http://localhost:3000/api/users/reset-password/${resetToken}`;
+
+    // Kirim Email (pakai nodemailer atau console.log)
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER, // email kamu
+        pass: process.env.EMAIL_PASS, // app password / 2FA
+      },
+    });
+
+    const mailOptions = {
+      to: user.email,
+      subject: "Password Reset - Book API",
+      html: `<p>Click the link below to reset your password:</p>
+             <a href="${resetUrl}">${resetUrl}</a>`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({ message: "Reset link sent to your email" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  const { password } = req.body;
+  const token = req.params.token;
+
+  try {
+    const hash = crypto.createHash("sha256").update(token).digest("hex");
+    const user = await User.findOne({
+      resetPasswordToken: hash,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) return res.status(400).json({ message: "Invalid or expired token" });
+
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.json({ message: "Password has been reset successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
 };

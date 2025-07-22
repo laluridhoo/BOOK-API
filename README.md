@@ -55,6 +55,12 @@ Sebuah RESTful API sederhana untuk mengelola koleksi buku, dengan dukungan auten
 - `DELETE /api/users`  
   Hapus akun dan semua buku milik user
 
+- `POST /api/users/forgot-password`
+  Kirim email berisi link reset password ke pengguna yang terdaftar.
+
+- `POST /api/users/reset-password/:token`
+  Setel ulang password menggunakan token yang dikirim ke email.
+
 ---
 
 ## 🧪 Testing Endpoint (Postman Collection)
