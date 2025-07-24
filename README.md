@@ -63,6 +63,12 @@ Sebuah RESTful API sederhana untuk mengelola koleksi buku, dengan dukungan auten
 
 ---
 
+## 🤖 AI Book Assistant
+
+`POST /api/ai/ask`
+
+- Ajukan pertanyaan ke AI tentang koleksi buku milik user.
+
 ## 🧪 Testing Endpoint (Postman Collection)
 
 > Belum tersedia. Akan segera ditambahkan.
@@ -77,6 +83,8 @@ Sebuah RESTful API sederhana untuk mengelola koleksi buku, dengan dukungan auten
 - BcryptJS (Hashing password)
 - dotenv (Konfigurasi variabel environment)
 - Validator (optional untuk validasi email/password)
+- nodemailer(untuk mengirim pesan via email)
+- openAi (untuk menjadi ai assisten)
 
 ---
 
