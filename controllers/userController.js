@@ -149,7 +149,7 @@ exports.forgotPassword = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    res.json({ message: "Reset link sent to your email" });
+    res.json({ message: "Reset password email sent" });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
