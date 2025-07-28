@@ -8,7 +8,7 @@ router.post("/login", loginUser);
 router.put("/change-password", protect, changePassword);
 router.get("/profile", protect, getProfile);
 router.put("/profile", protect, updateProfile);
-router.delete("/", protect, deleteAccount);
+router.delete("/delete-account", protect, deleteAccount);
 router.post("/logout", protect, logoutUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);

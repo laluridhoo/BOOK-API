@@ -15,7 +15,7 @@ app.use(
 );
 app.use("/api/books", bookRoutes);
 app.use(errorHandler);
-app.use("/api/users", userRoutes);
+app.use("/api/auth", userRoutes);
 app.use("/api/ai-assistant", aiRoutes);
 
 module.exports = app;
