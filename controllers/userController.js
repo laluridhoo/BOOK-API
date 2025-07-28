@@ -129,13 +129,14 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000; // 1 jam
     await user.save();
 
-    const resetUrl = `http://localhost:3000/api/users/reset-password/${resetToken}`;
+    const resetUrl = `http://localhost:3000/api/auth/reset-password/${resetToken}`;
 
     // Kirim Email (pakai nodemailer atau console.log)
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAIL_USER, // email kamu
+        user: process.env.EMAIL_USER, // email pengirim (sender)
         pass: process.env.EMAIL_PASS, // app password / 2FA
       },
     });
