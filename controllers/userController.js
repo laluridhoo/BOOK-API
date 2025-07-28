@@ -73,7 +73,7 @@ exports.changePassword = async (req, res) => {
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
-    res.json({ message: "Password berhasil diganti" });
+    res.json({ success: true, message: "Password changed successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
