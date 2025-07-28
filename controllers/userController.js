@@ -93,7 +93,18 @@ exports.updateProfile = async (req, res) => {
     if (email) user.email = email;
 
     await user.save();
-    res.json({ message: "Profil diperbarui" });
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+        },
+      },
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
