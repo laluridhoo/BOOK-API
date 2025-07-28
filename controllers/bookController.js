@@ -56,15 +56,29 @@ exports.getBooks = async (req, res) => {
       .skip(skip)
       .limit(parseInt(limit));
 
-    res.json({
-      page: parseInt(page),
-      limit: parseInt(limit),
-      totalData: total,
-      totalPages: Math.ceil(total / limit),
-      sortBy,
-      order,
-      filter: { finished },
-      data: books,
+    const mappedBooks = books.map((book) => ({
+      id: book._id,
+      title: book.title,
+      author: book.author,
+      genre: book.genre || "",
+      description: book.description || "",
+      userId: book.user,
+      createdAt: book.createdAt,
+      updatedAt: book.updatedAt,
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: {
+        books: mappedBooks,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(total / limit),
+          totalBooks: total,
+          hasNext: parseInt(page) < Math.ceil(total / limit),
+          hasPrev: parseInt(page) > 1,
+        },
+      },
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

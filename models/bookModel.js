@@ -22,6 +22,14 @@ const bookSchema = new mongoose.Schema(
     finished: {
       type: Boolean,
     },
+    genre: {
+      type: String,
+      default: "",
+    },
+    description: {
+      type: String,
+      default: "",
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
