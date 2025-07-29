@@ -154,3 +154,17 @@ exports.getGenres = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.getAuthors = async (req, res) => {
+  try {
+    const authors = await Book.distinct("author", { author: { $ne: "" } });
+    res.status(200).json({
+      success: true,
+      data: {
+        authors,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
