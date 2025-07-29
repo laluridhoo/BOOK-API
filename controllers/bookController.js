@@ -3,7 +3,7 @@ const Book = require("../models/bookModel");
 // Create book
 exports.createBook = async (req, res) => {
   try {
-    const { title, author, year, pageCount, readPage } = req.body;
+    const { title, author, year, pageCount, readPage, genre, description } = req.body;
     const finished = pageCount === readPage;
 
     const book = await Book.create({
@@ -13,6 +13,8 @@ exports.createBook = async (req, res) => {
       pageCount,
       readPage,
       finished,
+      genre,
+      description,
       user: req.user._id,
     });
 
@@ -111,10 +113,10 @@ exports.getBookById = async (req, res) => {
 // Update book
 exports.updateBook = async (req, res) => {
   try {
-    const { title, author, year, pageCount, readPage } = req.body;
+    const { title, author, year, pageCount, readPage, genre, description } = req.body;
     const finished = pageCount === readPage;
 
-    const book = await Book.findByIdAndUpdate(req.params.id, { title, author, year, pageCount, readPage, finished }, { new: true, runValidators: true });
+    const book = await Book.findByIdAndUpdate(req.params.id, { title, author, year, pageCount, readPage, finished, genre, description }, { new: true, runValidators: true });
 
     if (!book) return res.status(404).json({ message: "Book not found" });
     res.json(book);
