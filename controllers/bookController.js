@@ -135,3 +135,22 @@ exports.deleteBook = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.getGenres = async (req, res) => {
+  try {
+    /*
+  .distinct digunakan utuk mengambil semua nilai yang unik, 
+  disini dia mengambil nilai unik di genre.
+  { genre: { $ne: "" } } hanya ambil data yang genre-nya tidak kosong.
+*/
+    const genres = await Book.distinct("genre", { genre: { $ne: "" } });
+    res.status(200).json({
+      success: true,
+      data: {
+        genres,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
