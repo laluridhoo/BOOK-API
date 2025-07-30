@@ -1,5 +1,6 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Book = require("../models/bookModel");
+const errorResponse = require("../utils/errorResponse");
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -8,14 +9,14 @@ const askAI = async (req, res) => {
   const userId = req.user?._id;
 
   if (!prompt) {
-    return res.status(400).json({ error: "Prompt is required" });
+    return errorResponse(res, 400, "Prompt is required", "MISSING_PROMPT");
   }
 
   try {
     // --- LANGKAH DEBUGGING ---
     console.log("Mencari buku untuk User ID:", userId);
 
-    const books = await Book.find({ createdBy: userId });
+    const books = await Book.find({ user: userId });
 
     // --- LANGKAH DEBUGGING ---
     console.log("Buku yang ditemukan di database:", books);
@@ -53,7 +54,7 @@ Jawabanmu:`;
     res.json({ reply });
   } catch (error) {
     console.error("AI Assistant Error:", error);
-    res.status(500).json({ error: "AI Assistant failed to respond." });
+    errorResponse(res, 500, "AI Assistant failed to respond.", "AI_SERVICE_ERROR", error.message);
   }
 };
 

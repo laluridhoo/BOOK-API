@@ -1,8 +1,10 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
+const Book = require("../models/bookModel");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const errorResponse = require("../utils/errorResponse");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
@@ -13,7 +15,7 @@ exports.registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
   const userExists = await User.findOne({ email });
-  if (userExists) return res.status(400).json({ message: "User already exists" });
+  if (userExists) return errorResponse(res, 400, "User already exists", "USER_EXISTS");
 
   const user = await User.create({ name, email, password });
 
@@ -37,7 +39,7 @@ exports.loginUser = async (req, res) => {
 
   const user = await User.findOne({ email });
   if (!user || !(await user.matchPassword(password))) {
-    return res.status(401).json({ message: "Invalid email or password" });
+    return errorResponse(res, 401, "Invalid email or password", "INVALID_CREDENTIALS");
   }
 
   res.status(200).json({
@@ -59,7 +61,7 @@ exports.changePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
   if (!currentPassword || !newPassword) {
-    return res.status(400).json({ message: "Isi semua field" });
+    return errorResponse(res, 400, "Isi semua field", "MISSING_FIELDS");
   }
 
   try {
@@ -67,7 +69,7 @@ exports.changePassword = async (req, res) => {
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Password lama salah" });
+      return errorResponse(res, 401, "Password lama salah", "INVALID_PASSWORD");
     }
 
     user.password = await bcrypt.hash(newPassword, 10);
@@ -75,13 +77,17 @@ exports.changePassword = async (req, res) => {
 
     res.json({ success: true, message: "Password changed successfully" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    errorResponse(res, 500, err.message, "SERVER_ERROR");
   }
 };
 // Get User Profile
 exports.getProfile = async (req, res) => {
-  const user = await User.findById(req.user._id).select("-password");
-  res.json(user);
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+    res.json(user);
+  } catch (err) {
+    errorResponse(res, 500, err.message, "SERVER_ERROR");
+  }
 };
 // update user Profile
 exports.updateProfile = async (req, res) => {
@@ -106,7 +112,7 @@ exports.updateProfile = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    errorResponse(res, 500, err.message, "SERVER_ERROR");
   }
 };
 // Delete User Account
@@ -116,7 +122,7 @@ exports.deleteAccount = async (req, res) => {
     await User.findByIdAndDelete(req.user._id); // Hapus user
     res.json({ message: "Akun dan semua data dihapus" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    errorResponse(res, 500, err.message, "SERVER_ERROR");
   }
 };
 //logout User
@@ -130,7 +136,7 @@ exports.forgotPassword = async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) return errorResponse(res, 404, "User not found", "USER_NOT_FOUND");
 
     // generate token
     const resetToken = crypto.randomBytes(20).toString("hex");
@@ -163,7 +169,7 @@ exports.forgotPassword = async (req, res) => {
 
     res.json({ message: "Reset password email sent" });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    errorResponse(res, 500, "Server error", "SERVER_ERROR", err.message);
   }
 };
 
@@ -178,7 +184,7 @@ exports.resetPassword = async (req, res) => {
       resetPasswordExpires: { $gt: Date.now() },
     });
 
-    if (!user) return res.status(400).json({ message: "Invalid or expired token" });
+    if (!user) return errorResponse(res, 400, "Invalid or expired token", "INVALID_TOKEN");
 
     user.password = password;
     user.resetPasswordToken = undefined;
@@ -187,6 +193,6 @@ exports.resetPassword = async (req, res) => {
 
     res.json({ message: "Password has been reset successfully" });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    errorResponse(res, 500, "Server error", "SERVER_ERROR", err.message);
   }
 };

@@ -1,4 +1,5 @@
 const Book = require("../models/bookModel");
+const errorResponse = require("../utils/errorResponse");
 
 // Create book
 exports.createBook = async (req, res) => {
@@ -20,7 +21,7 @@ exports.createBook = async (req, res) => {
 
     res.status(201).json(book);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    errorResponse(res, 400, err.message, "VALIDATION_ERROR");
   }
 };
 
@@ -83,7 +84,7 @@ exports.getBooks = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    errorResponse(res, 500, err.message, "SERVER_ERROR");
   }
 };
 
@@ -95,7 +96,7 @@ exports.getMyBooks = async (req, res) => {
       books,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    errorResponse(res, 500, err.message, "SERVER_ERROR");
   }
 };
 
@@ -103,10 +104,10 @@ exports.getMyBooks = async (req, res) => {
 exports.getBookById = async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
-    if (!book) return res.status(404).json({ message: "Book not found" });
+    if (!book) return errorResponse(res, 404, "Book not found", "BOOK_NOT_FOUND");
     res.json(book);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    errorResponse(res, 500, err.message, "SERVER_ERROR");
   }
 };
 
@@ -118,10 +119,10 @@ exports.updateBook = async (req, res) => {
 
     const book = await Book.findByIdAndUpdate(req.params.id, { title, author, year, pageCount, readPage, finished, genre, description }, { new: true, runValidators: true });
 
-    if (!book) return res.status(404).json({ message: "Book not found" });
+    if (!book) return errorResponse(res, 404, "Book not found", "BOOK_NOT_FOUND");
     res.json(book);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    errorResponse(res, 400, err.message, "VALIDATION_ERROR");
   }
 };
 
@@ -129,20 +130,15 @@ exports.updateBook = async (req, res) => {
 exports.deleteBook = async (req, res) => {
   try {
     const book = await Book.findByIdAndDelete(req.params.id);
-    if (!book) return res.status(404).json({ message: "Book not found" });
+    if (!book) return errorResponse(res, 404, "Book not found", "BOOK_NOT_FOUND");
     res.json({ message: "Book deleted" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    errorResponse(res, 500, err.message, "SERVER_ERROR");
   }
 };
 
 exports.getGenres = async (req, res) => {
   try {
-    /*
-  .distinct digunakan utuk mengambil semua nilai yang unik, 
-  disini dia mengambil nilai unik di genre.
-  { genre: { $ne: "" } } hanya ambil data yang genre-nya tidak kosong.
-*/
     const genres = await Book.distinct("genre", { genre: { $ne: "" } });
     res.status(200).json({
       success: true,
@@ -151,7 +147,7 @@ exports.getGenres = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    errorResponse(res, 500, err.message, "SERVER_ERROR");
   }
 };
 
@@ -165,6 +161,6 @@ exports.getAuthors = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    errorResponse(res, 500, err.message, "SERVER_ERROR");
   }
 };
