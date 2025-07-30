@@ -1,39 +1,55 @@
-const openai = require("../utils/openai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Book = require("../models/bookModel");
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const askAI = async (req, res) => {
   const { prompt } = req.body;
-  const userId = req.user?._id; // jika autentikasi dipakai
+  const userId = req.user?._id;
 
   if (!prompt) {
     return res.status(400).json({ error: "Prompt is required" });
   }
 
   try {
-    // Ambil buku-buku milik user (atau semua jika publik)
+    // --- LANGKAH DEBUGGING ---
+    console.log("Mencari buku untuk User ID:", userId);
+
     const books = await Book.find({ createdBy: userId });
 
-    const bookList = books.map((book) => `- ${book.title} oleh ${book.author} (genre: ${book.genre})`).join("\n");
+    // --- LANGKAH DEBUGGING ---
+    console.log("Buku yang ditemukan di database:", books);
 
-    const fullPrompt = `
-Kamu adalah asisten buku. Berikut adalah koleksi buku dari user:
+    let bookList;
 
+    // --- LOGIKA PENTING ---
+    // Cek apakah ada buku yang ditemukan atau tidak
+    if (books.length > 0) {
+      bookList = books.map((book) => `- ${book.title} oleh ${book.author} (genre: ${book.genre})`).join("\n");
+    } else {
+      // Jika tidak ada buku, berikan pesan ini ke AI
+      bookList = "User ini belum memiliki buku di dalam koleksinya.";
+    }
+
+    const fullPrompt = `Kamu adalah asisten buku yang cerdas. Jawab pertanyaan user berdasarkan koleksi buku yang mereka miliki.
+Koleksi buku user:
 ${bookList}
 
-Pertanyaan user: ${prompt}
-Berikan jawaban yang relevan berdasarkan daftar buku di atas.
-`;
+---
+Pertanyaan User: "${prompt}"
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        { role: "system", content: "Kamu adalah asisten cerdas untuk aplikasi Book API." },
-        { role: "user", content: fullPrompt },
-      ],
-      temperature: 0.7,
-    });
+Jawabanmu:`;
 
-    const reply = completion.choices[0].message.content;
+    // --- LANGKAH DEBUGGING ---
+    console.log("===================================");
+    console.log("Prompt yang dikirim ke AI:", fullPrompt);
+    console.log("===================================");
+
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const result = await model.generateContent(fullPrompt);
+    const response = await result.response;
+    const reply = response.text();
+
     res.json({ reply });
   } catch (error) {
     console.error("AI Assistant Error:", error);
