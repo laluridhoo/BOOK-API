@@ -146,7 +146,9 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000; // 1 jam
     await user.save();
 
-    const resetUrl = `http://localhost:3000/api/auth/reset-password/${resetToken}`;
+    // Di dalam controller backend Anda
+
+const resetUrl = `http://localhost:8080/reset-password?token=${resetToken}`;
 
     // Kirim Email (pakai nodemailer atau console.log)
 

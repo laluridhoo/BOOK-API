@@ -1,21 +1,29 @@
-require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const app = express();
 const bookRoutes = require("./routes/bookRoutes");
-const errorHandler = require("./middleware/errorHandler");
 const userRoutes = require("./routes/userRoutes");
 const aiRoutes = require("./routes/aiRoutes");
-app.use(express.json());
+const errorHandler = require("./middleware/errorHandler");
+
+const app = express();
+
+// 1. Konfigurasi CORS (cukup satu kali)
 app.use(
   cors({
     origin: ["http://localhost:8080", "https://yourfrontenddomain.com"],
     credentials: true,
   })
 );
+
+// 2. Middleware untuk parsing body
+app.use(express.json());
+
+// 3. Semua rute API Anda
 app.use("/api/books", bookRoutes);
-app.use(errorHandler);
 app.use("/api/auth", userRoutes);
 app.use("/api/ai-assistant", aiRoutes);
+
+// 4. Error handler di posisi paling akhir
+app.use(errorHandler);
 
 module.exports = app;
