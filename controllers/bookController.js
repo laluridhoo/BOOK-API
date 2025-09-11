@@ -19,7 +19,7 @@ exports.createBook = async (req, res) => {
       user: req.user._id,
     });
 
-    res.status(201).json(book);
+    res.status(201).json({ success: true, data: book });
   } catch (err) {
     errorResponse(res, 400, err.message, "VALIDATION_ERROR");
   }
@@ -91,10 +91,7 @@ exports.getBooks = async (req, res) => {
 exports.getMyBooks = async (req, res) => {
   try {
     const books = await Book.find({ user: req.user._id }).sort({ createdAt: -1 });
-    res.json({
-      count: books.length,
-      books,
-    });
+    res.status(200).json({ success: true, data: books });
   } catch (err) {
     errorResponse(res, 500, err.message, "SERVER_ERROR");
   }
