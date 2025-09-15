@@ -68,6 +68,10 @@ exports.getBooks = async (req, res) => {
       userId: book.user,
       createdAt: book.createdAt,
       updatedAt: book.updatedAt,
+
+      readPage: book.readPage ?? 0,
+      pageCount: book.pageCount ?? 0,
+      finished: book.finished ?? false,
     }));
 
     res.status(200).json({
