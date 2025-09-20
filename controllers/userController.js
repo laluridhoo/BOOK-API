@@ -72,7 +72,7 @@ exports.changePassword = async (req, res) => {
       return errorResponse(res, 401, "Password lama salah", "INVALID_PASSWORD");
     }
 
-    user.password = await bcrypt.hash(newPassword, 10);
+    user.password = newPassword;
     await user.save();
 
     res.json({ success: true, message: "Password changed successfully" });
@@ -148,7 +148,7 @@ exports.forgotPassword = async (req, res) => {
 
     // Di dalam controller backend Anda
 
-const resetUrl = `http://localhost:8080/reset-password?token=${resetToken}`;
+    const resetUrl = `http://localhost:8080/reset-password?token=${resetToken}`;
 
     // Kirim Email (pakai nodemailer atau console.log)
 
