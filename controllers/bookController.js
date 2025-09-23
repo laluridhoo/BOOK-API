@@ -4,8 +4,37 @@ const errorResponse = require("../utils/errorResponse");
 // Create book
 exports.createBook = async (req, res) => {
   try {
-    const { title, author, year, pageCount, readPage, genre, description } = req.body;
-    const finished = pageCount === readPage;
+    let { title, author, year, pageCount, readPage, genre, description } = req.body;
+
+    // Normalisasi & validasi defensif
+    if (typeof title === "string") title = title.trim();
+    if (typeof author === "string") author = author.trim();
+    if (typeof genre === "string") genre = genre.trim();
+    if (typeof description === "string") description = description.trim();
+
+    if (!title) return errorResponse(res, 400, "Title is required", "VALIDATION_ERROR");
+    if (!author) return errorResponse(res, 400, "Author is required", "VALIDATION_ERROR");
+
+    if (year !== undefined && Number.isNaN(Number(year))) {
+      return errorResponse(res, 400, "Year must be a number", "VALIDATION_ERROR");
+    }
+    if (pageCount !== undefined && Number.isNaN(Number(pageCount))) {
+      return errorResponse(res, 400, "pageCount must be a number", "VALIDATION_ERROR");
+    }
+    if (readPage !== undefined && Number.isNaN(Number(readPage))) {
+      return errorResponse(res, 400, "readPage must be a number", "VALIDATION_ERROR");
+    }
+
+    // Cast ke number bila dikirim sebagai string dari frontend
+    if (year !== undefined) year = Number(year);
+    if (pageCount !== undefined) pageCount = Number(pageCount);
+    if (readPage !== undefined) readPage = Number(readPage);
+
+    if (pageCount !== undefined && readPage !== undefined && readPage > pageCount) {
+      return errorResponse(res, 400, "readPage cannot be greater than pageCount", "VALIDATION_ERROR");
+    }
+
+    const finished = pageCount !== undefined && readPage !== undefined ? pageCount === readPage : false;
 
     const book = await Book.create({
       title,
@@ -116,12 +145,26 @@ exports.getBookById = async (req, res) => {
 exports.updateBook = async (req, res) => {
   try {
     const { title, author, year, pageCount, readPage, genre, description } = req.body;
-    const finished = pageCount === readPage;
 
-    const book = await Book.findByIdAndUpdate(req.params.id, { title, author, year, pageCount, readPage, finished, genre, description }, { new: true, runValidators: true });
-
+    const book = await Book.findById(req.params.id);
     if (!book) return errorResponse(res, 404, "Book not found", "BOOK_NOT_FOUND");
-    res.json(book);
+
+    if (title !== undefined) book.title = title;
+    if (author !== undefined) book.author = author;
+    if (year !== undefined) book.year = year;
+    if (pageCount !== undefined) book.pageCount = pageCount;
+    if (readPage !== undefined) book.readPage = readPage;
+    if (genre !== undefined) book.genre = genre;
+    if (description !== undefined) book.description = description;
+
+    // Hitung ulang finished hanya jika ada perubahan pada readPage atau pageCount,
+    // namun aman juga untuk dihitung ulang setiap kali menyimpan
+    const currentPageCount = book.pageCount ?? 0;
+    const currentReadPage = book.readPage ?? 0;
+    book.finished = currentPageCount === currentReadPage;
+
+    const saved = await book.save();
+    res.json(saved);
   } catch (err) {
     errorResponse(res, 400, err.message, "VALIDATION_ERROR");
   }
