@@ -13,13 +13,13 @@ const askAI = async (req, res) => {
   }
 
   try {
-    // --- LANGKAH DEBUGGING ---
-    console.log("Mencari buku untuk User ID:", userId);
+    // // --- LANGKAH DEBUGGING ---
+    // console.log("Mencari buku untuk User ID:", userId);
 
     const books = await Book.find({ user: userId });
 
-    // --- LANGKAH DEBUGGING ---
-    console.log("Buku yang ditemukan di database:", books);
+    // // --- LANGKAH DEBUGGING ---
+    // console.log("Buku yang ditemukan di database:", books);
 
     let bookList;
 
@@ -41,10 +41,10 @@ Pertanyaan User: "${prompt}"
 
 Jawabanmu:`;
 
-    // --- LANGKAH DEBUGGING ---
-    console.log("===================================");
-    console.log("Prompt yang dikirim ke AI:", fullPrompt);
-    console.log("===================================");
+    // // --- LANGKAH DEBUGGING ---
+    // console.log("===================================");
+    // console.log("Prompt yang dikirim ke AI:", fullPrompt);
+    // console.log("===================================");
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
     const result = await model.generateContent(fullPrompt);
