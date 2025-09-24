@@ -20,15 +20,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 2b. Middleware logging sederhana untuk debug payload
-app.use((req, res, next) => {
-  console.log("[REQUEST]", {
-    method: req.method,
-    url: req.originalUrl,
-    contentType: req.headers["content-type"],
-    body: req.body,
-  });
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log("[REQUEST]", {
+//     method: req.method,
+//     url: req.originalUrl,
+//     contentType: req.headers["content-type"],
+//     body: req.body,
+//   });
+//   next();
+// });
 
 // 3. Semua rute API Anda
 app.use("/api/books", bookRoutes);
