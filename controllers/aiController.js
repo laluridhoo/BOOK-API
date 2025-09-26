@@ -26,13 +26,33 @@ const askAI = async (req, res) => {
     // --- LOGIKA PENTING ---
     // Cek apakah ada buku yang ditemukan atau tidak
     if (books.length > 0) {
-      bookList = books.map((book) => `- ${book.title} oleh ${book.author} (genre: ${book.genre})`).join("\n");
+      bookList = books
+        .map((book) => {
+          const progress = book.pageCount > 0 ? Math.round((book.readPage / book.pageCount) * 100) : 0;
+          const status = book.finished ? "Selesai dibaca" : `Sedang dibaca (${progress}%)`;
+          const yearInfo = book.year ? ` (${book.year})` : "";
+          const descriptionInfo = book.description ? `\n    Deskripsi: ${book.description}` : "";
+
+          return `- ${book.title} oleh ${book.author}${yearInfo}
+    Genre: ${book.genre}
+    Halaman: ${book.readPage}/${book.pageCount}
+    Status: ${status}${descriptionInfo}`;
+        })
+        .join("\n\n");
     } else {
       // Jika tidak ada buku, berikan pesan ini ke AI
       bookList = "User ini belum memiliki buku di dalam koleksinya.";
     }
 
     const fullPrompt = `Kamu adalah asisten buku yang cerdas. Jawab pertanyaan user berdasarkan koleksi buku yang mereka miliki.
+
+Kamu memiliki akses ke informasi lengkap tentang koleksi buku user, termasuk:
+- Judul dan penulis buku
+- Genre dan tahun terbit
+- Jumlah halaman total dan halaman yang sudah dibaca
+- Status pembacaan (selesai atau sedang dibaca dengan persentase progress)
+- Deskripsi buku
+
 Koleksi buku user:
 ${bookList}
 
