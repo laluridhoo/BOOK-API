@@ -8,7 +8,7 @@ const errorHandler = require("./middleware/errorHandler");
 const app = express();
 
 // 1. Konfigurasi CORS (cukup satu kali)
-const allowedOrigins = ["http://localhost:8080", "http://localhost:3000", "https://rak-buku-ku-app.vercel.app/"];
+const allowedOrigins = ["http://localhost:8080", "http://localhost:3000", "https://rak-buku-ku-app.vercel.app"];
 
 const corsOptions = {
   origin: (origin, callback) => {
