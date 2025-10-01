@@ -10,7 +10,7 @@ const app = express();
 // 1. Konfigurasi CORS (cukup satu kali)
 app.use(
   cors({
-    origin: ["http://localhost:8080", "https://yourfrontenddomain.com"],
+    origin: ["http://localhost:8080", "rak-buku-ku-17pwkekyc-ridhos-projects-bf9200c4.vercel.app"],
     credentials: true,
   })
 );
