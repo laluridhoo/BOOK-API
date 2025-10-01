@@ -66,7 +66,7 @@ Jawabanmu:`;
     // console.log("Prompt yang dikirim ke AI:", fullPrompt);
     // console.log("===================================");
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     const reply = response.text();
