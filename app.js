@@ -27,7 +27,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+app.options("(.*)", cors(corsOptions));
 
 // 1b. Health check sederhana untuk validasi deployment/proxy
 app.get("/health", (req, res) => {
