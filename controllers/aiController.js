@@ -16,7 +16,8 @@ const askAI = async (req, res) => {
     // // --- LANGKAH DEBUGGING ---
     // console.log("Mencari buku untuk User ID:", userId);
 
-    const books = await Book.find({ user: userId });
+    const booksRaw = await Book.find({ user: userId });
+    const books = Array.isArray(booksRaw) ? booksRaw : [];
 
     // // --- LANGKAH DEBUGGING ---
     // console.log("Buku yang ditemukan di database:", books);
@@ -25,7 +26,7 @@ const askAI = async (req, res) => {
 
     // --- LOGIKA PENTING ---
     // Cek apakah ada buku yang ditemukan atau tidak
-    if (books.length > 0) {
+    if (Array.isArray(books) && books.length > 0) {
       bookList = books
         .map((book) => {
           const progress = book.pageCount > 0 ? Math.round((book.readPage / book.pageCount) * 100) : 0;
