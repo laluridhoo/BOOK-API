@@ -8,12 +8,26 @@ const errorHandler = require("./middleware/errorHandler");
 const app = express();
 
 // 1. Konfigurasi CORS (cukup satu kali)
-app.use(
-  cors({
-    origin: ["http://localhost:8080", "rak-buku-ku-17pwkekyc-ridhos-projects-bf9200c4.vercel.app"],
-    credentials: true,
-  })
-);
+const allowedOrigins = ["http://localhost:8080", "http://localhost:3000", "https://rak-buku-ku-17pwkekyc-ridhos-projects-bf9200c4.vercel.app"];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow non-browser tools
+
+    const isVercelPreview = /^https?:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin);
+    if (allowedOrigins.includes(origin) || isVercelPreview) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS blocked: ${origin} not allowed`));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 // 2. Middleware untuk parsing body
 app.use(express.json());
